@@ -1,1 +1,1 @@
-/Users/furkan/Desktop/RustProjects/verison_control/verison_control/target/debug/verison_control: /Users/furkan/Desktop/RustProjects/verison_control/verison_control/src/apply.rs /Users/furkan/Desktop/RustProjects/verison_control/verison_control/src/main.rs
+/Users/furkan/Desktop/RustProjects/verison_control/rust_verison_control/verison_control/target/debug/verison_control: /Users/furkan/Desktop/RustProjects/verison_control/rust_verison_control/verison_control/src/apply.rs /Users/furkan/Desktop/RustProjects/verison_control/rust_verison_control/verison_control/src/main.rs

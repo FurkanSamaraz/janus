@@ -1,50 +1,47 @@
 # Rust Verison Control
+This project is a version management tool developed in the Rust language. The project can be used to increment the version of a project, Git tag and commit changes automatically.
 
-Bu proje, Rust dilinde geliştirilen bir versiyon yönetim aracıdır. Proje, bir projenin versiyonunu artırmak, Git etiketlemek ve değişiklikleri otomatik olarak taahhüt etmek için kullanılabilir.
+## Start
+You can follow the steps below to run and develop the project on your local machine.
 
-## Başlangıç
+### Requirements
+The following software must be installed to run this project:
 
-Projeyi yerel makinenizde çalıştırmak ve geliştirmek için aşağıdaki adımları takip edebilirsiniz.
-
-### Gereksinimler
-
-Bu projeyi çalıştırmak için aşağıdaki yazılımların yüklü olması gereklidir:
 
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Git](https://git-scm.com/downloads)
 
-### Kurulum
-
-#### Projeyi klonlayın:
+### Setup
+#### Clone the project:
 
    ```sh
-   git clone https://github.com/kullanici_adi/rust-ornek-proje.git
+   git clone https://github.com/FurkanSamaraz/version_control.git
    ```
 
-#### Proje klasörüne gidin:
+#### Go to the project folder:
 ```sh
-cd rust-ornek-proje
+cd version_control
 ```
-#### Projeyi derleyin:
+#### Build the project:
 ```sh
 cargo build
 ```
 
-### Kullanım
-Projeyi çalıştırmak için aşağıdaki komutları kullanabilirsiniz:
+### Use
+You can use the following commands to run the project:
 
-#### Versiyonu artırmak için:
+#### To increase the version:
 
 ```sh
 cargo run patch
 ```
 
-#### Küçük bir versiyon yükseltmesi için:
+#### For a minor version upgrade:
 
 ```sh
 cargo run minor
 ```
-#### Büyük bir versiyon yükseltmesi için:
+#### For a major version upgrade:
 
 ```sh
 cargo run major
