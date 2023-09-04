@@ -11,6 +11,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?;
     let regex_ios_version = Regex::new(r#"MARKETING_VERSION\s+=\s+[\d.]+;"#)?;
+    let regex_android_version_code = Regex::new(r#"versionCode\s+\d+"#)?;
+    let regex_android_version_name = Regex::new(r#"versionName\s+"#)?;
 
     let mut version = Version {
         major: 1,
@@ -84,6 +86,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     apply::apply_package(&version_str)?;
     apply::apply_ios(&version, &version_str, regex_ios_build, regex_ios_version)?;
+    apply::apply_android(&version, &version_str, regex_android_version_code, regex_android_version_name)?;
     apply::apply_new_version(".version", &version)?;
 
     if is_new_version {

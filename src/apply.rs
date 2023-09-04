@@ -32,6 +32,35 @@ pub fn apply_package(version_str: &str) -> Result<(), Box<dyn std::error::Error>
 
     Ok(())
 }
+// Bu fonksiyon Android projenizi günceller.
+pub fn apply_android(
+    version: &Version,
+    version_str: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Android projesinin yerel yolunu bulun.
+    let android_build_gradle_path = Path::new("android/app/build.gradle");
+
+    if android_build_gradle_path.exists() {
+        println!("Reading Android build.gradle");
+        let mut build_gradle_text = fs::read_to_string(&android_build_gradle_path)?;
+
+        // versionCode ve versionName değerlerini günceller.
+        build_gradle_text = build_gradle_text.replace(
+            "versionCode",
+            &format!("versionCode {}", version.build),
+        );
+
+        build_gradle_text = build_gradle_text.replace(
+            "versionName",
+            &format!("versionName \"{}\"", version_str),
+        );
+
+        println!("Writing new Android build.gradle file");
+        fs::write(&android_build_gradle_path, &build_gradle_text)?;
+    }
+
+    Ok(())
+}
 
 // Bu fonksiyon iOS projenizi günceller.
 pub fn apply_ios(
