@@ -1,4 +1,4 @@
-# Rust Verison Control
+# Rust Version Control
 This project is a version management tool developed in the Rust language. The project can be used to increment the version of a project, Git tag and commit changes automatically.
 
 ## Start
