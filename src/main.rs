@@ -6,8 +6,6 @@ use regex::Regex;
 use std::env;
 use std::fs;
 
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 
@@ -23,23 +21,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut is_new_version = false;
 
-    let version_text = fs::read_to_string(".version")?;
-    let lines: Vec<&str> = version_text.lines().collect();
+    if let Ok(version_text) = fs::read_to_string(".version") {
+        let lines: Vec<&str> = version_text.lines().collect();
 
-    for line in lines {
-        let parts: Vec<&str> = line.split('=').collect();
-        if parts.len() == 2 {
-            let key = parts[0].trim().to_lowercase();
-            let value = parts[1].trim();
+        for line in lines {
+            let parts: Vec<&str> = line.split('=').collect();
+            if parts.len() == 2 {
+                let key = parts[0].trim().to_lowercase();
+                let value = parts[1].trim();
 
-            match key.as_str() {
-                "major" => version.major = value.parse::<u32>()?,
-                "minor" => version.minor = value.parse::<u32>()?,
-                "patch" => version.patch = value.parse::<u32>()?,
-                "build" => version.build = value.parse::<u32>()?,
-                _ => {}
+                match key.as_str() {
+                    "major" => version.major = value.parse::<u32>()?,
+                    "minor" => version.minor = value.parse::<u32>()?,
+                    "patch" => version.patch = value.parse::<u32>()?,
+                    "build" => version.build = value.parse::<u32>()?,
+                    _ => {}
+                }
             }
         }
+    } else {
+        // .version dosyası bulunamazsa varsayılan değerler kullanılır.
+        println!(".version file not found. Using default version values.");
     }
 
     let last_version = format!(

@@ -13,6 +13,7 @@ pub struct Version {
 }
 impl Version {}
 
+// Bu fonksiyon package.json dosyasını günceller.
 pub fn apply_package(version_str: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("Reading package.json contents");
     let package_path = Path::new("package.json");
@@ -32,21 +33,26 @@ pub fn apply_package(version_str: &str) -> Result<(), Box<dyn std::error::Error>
     Ok(())
 }
 
+// Bu fonksiyon iOS projenizi günceller.
 pub fn apply_ios(
     version: &Version,
     version_str: &str,
     regex_ios_build: Regex,
     regex_ios_version: Regex,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    // iOS projesinin yerel yolunu bulun.
+    let ios_project_path = find_ios_project_path()?;
+    
     println!("Reading IOS project.pbxproj");
-    let manifest_path = Path::new("ios/MapleMars.xcodeproj/project.pbxproj");
-    let manifest_backup_path = Path::new("ios/MapleMars.xcodeproj/project.pbxproj.bak");
+    let manifest_path = ios_project_path.join("project.pbxproj");
+    let manifest_backup_path = ios_project_path.join("project.pbxproj.bak");
 
     println!("Backing up project file");
-    fs::copy(manifest_path, manifest_backup_path)?;
+    fs::copy(&manifest_path, &manifest_backup_path)?;
 
-    let mut manifest_text = fs::read_to_string(manifest_path)?;
+    let mut manifest_text = fs::read_to_string(&manifest_path)?;
 
+    // CURRENT_PROJECT_VERSION ve MARKETING_VERSION değerlerini günceller.
     manifest_text = regex_ios_build
         .replace_all(
             &manifest_text,
@@ -57,16 +63,17 @@ pub fn apply_ios(
     manifest_text = regex_ios_version
         .replace_all(
             &manifest_text,
-            format!("MARKETING_VERSION = {};", version_str).as_str(),
+            format!("MARKETING_VERSION = \"{}\";", version_str).as_str(),
         )
         .to_string();
 
     println!("Writing new manifest file");
-    fs::write(manifest_path, &manifest_text)?;
+    fs::write(&manifest_path, &manifest_text)?;
 
     Ok(())
 }
 
+// Bu fonksiyon .version dosyasını günceller.
 pub fn apply_new_version(path: &str, version: &Version) -> Result<(), Box<dyn std::error::Error>> {
     println!("Writing new .version file");
     let text = format!(
@@ -78,6 +85,7 @@ pub fn apply_new_version(path: &str, version: &Version) -> Result<(), Box<dyn st
     Ok(())
 }
 
+// Bu fonksiyon git işlemlerini gerçekleştirir.
 pub fn apply_commit(
     version_str: &str,
     last_version: &str,
@@ -119,3 +127,25 @@ pub fn apply_commit(
 
     Ok(())
 }
+
+// Bu fonksiyon iOS projesinin yerel yolunu bulur.
+fn find_ios_project_path() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
+    // Proje adını package.json dosyasından alın.
+    let package_path = Path::new("package.json");
+    let package_obj: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(package_path)?)?;
+
+    if let Some(project_name) = package_obj["name"].as_str() {
+        // iOS projesi için beklenebilecek klasör adını oluşturun.
+        let ios_project_name = format!("{}.xcodeproj", project_name);
+        let ios_project_path = Path::new("ios").join(ios_project_name);
+
+        if ios_project_path.exists() {
+            return Ok(ios_project_path);
+        }
+    }
+
+    // Eğer proje adı bulunamazsa veya iOS projesi yoksa hata döndürün.
+    Err("iOS project not found")?
+}
+
