@@ -43,7 +43,7 @@ pub fn apply_android(
     let android_project_path = find_android_project_path()?;
 
     // Android projesinin build.gradle dosyasının yolunu belirleyin.
-    let build_gradle_path = android_project_path.join("app/build.gradle");
+    let build_gradle_path = android_project_path.join("build.gradle");
 
     if build_gradle_path.exists() {
         println!("Reading Android build.gradle");
