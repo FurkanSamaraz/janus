@@ -58,7 +58,7 @@ pub fn apply_android(
         // versionName değerini sadece yeni sürümle günceller.
         build_gradle_text =
             regex_android_version_name
-                .replace_all(&build_gradle_text, format!("versionName {}", version_str).as_str())
+                .replace_all(&build_gradle_text, format!("versionName \"{}\"", version_str).as_str())
                 .to_string();
 
         println!("Writing new Android build.gradle file");
