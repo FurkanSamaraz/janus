@@ -132,7 +132,7 @@ pub fn apply_commit(
     version_str: &str,
     last_version: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let tag_name = "main";
+    let tag_name = format!("v{}", last_version);
     let last_id = String::from_utf8(
         Command::new("git")
             .args(&["log", "--format=\"%h\"", "-n", "1"])
