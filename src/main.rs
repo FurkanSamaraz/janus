@@ -85,8 +85,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("New version is {} Build {}", version_str, version.build);
 
     apply::apply_package(&version_str)?;
-    apply::apply_ios(&version, &version_str, regex_ios_build, regex_ios_version)?;
-    apply::apply_android(&version, &version_str, regex_android_version_code, regex_android_version_name)?;
+    apply::apply_ios(&version, &version_str, &regex_ios_build, &regex_ios_version)?;
+    apply::apply_android(&version, &version_str, &regex_android_version_code, &regex_android_version_name)?;
     apply::apply_new_version(".version", &version)?;
 
     if is_new_version {

@@ -36,27 +36,32 @@ pub fn apply_package(version_str: &str) -> Result<(), Box<dyn std::error::Error>
 pub fn apply_android(
     version: &Version,
     version_str: &str,
+    regex_android_version_code: &Regex,
+    regex_android_version_name: &Regex,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Android projesinin yerel yolunu bulun.
-    let android_build_gradle_path = Path::new("android/app/build.gradle");
+    let android_project_path = find_android_project_path()?;
 
-    if android_build_gradle_path.exists() {
+    // Android projesinin build.gradle dosyasının yolunu belirleyin.
+    let build_gradle_path = android_project_path.join("app/build.gradle");
+
+    if build_gradle_path.exists() {
         println!("Reading Android build.gradle");
-        let mut build_gradle_text = fs::read_to_string(&android_build_gradle_path)?;
+        let mut build_gradle_text = fs::read_to_string(&build_gradle_path)?;
 
         // versionCode ve versionName değerlerini günceller.
-        build_gradle_text = build_gradle_text.replace(
-            "versionCode",
-            &format!("versionCode {}", version.build),
-        );
+        build_gradle_text =
+            regex_android_version_code
+                .replace_all(&build_gradle_text, format!("versionCode {}", version.build).as_str())
+                .to_string();
 
-        build_gradle_text = build_gradle_text.replace(
-            "versionName",
-            &format!("versionName \"{}\"", version_str),
-        );
+        build_gradle_text =
+            regex_android_version_name
+                .replace_all(&build_gradle_text, format!("versionName \"{}\"", version_str).as_str())
+                .to_string();
 
         println!("Writing new Android build.gradle file");
-        fs::write(&android_build_gradle_path, &build_gradle_text)?;
+        fs::write(&build_gradle_path, &build_gradle_text)?;
     }
 
     Ok(())
@@ -66,12 +71,12 @@ pub fn apply_android(
 pub fn apply_ios(
     version: &Version,
     version_str: &str,
-    regex_ios_build: Regex,
-    regex_ios_version: Regex,
+    regex_ios_build: &Regex,
+    regex_ios_version: &Regex,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // iOS projesinin yerel yolunu bulun.
     let ios_project_path = find_ios_project_path()?;
-    
+
     println!("Reading IOS project.pbxproj");
     let manifest_path = ios_project_path.join("project.pbxproj");
     let manifest_backup_path = ios_project_path.join("project.pbxproj.bak");
@@ -161,16 +166,17 @@ pub fn apply_commit(
 fn find_ios_project_path() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
     // Proje adını package.json dosyasından alın.
     let package_path = Path::new("package.json");
-    let package_obj: serde_json::Value =
-        serde_json::from_str(&fs::read_to_string(package_path)?)?;
+    if package_path.exists() {
+        let package_obj: serde_json::Value = serde_json::from_str(&fs::read_to_string(package_path)?)?;
 
-    if let Some(project_name) = package_obj["name"].as_str() {
-        // iOS projesi için beklenebilecek klasör adını oluşturun.
-        let ios_project_name = format!("{}.xcodeproj", project_name);
-        let ios_project_path = Path::new("ios").join(ios_project_name);
+        if let Some(project_name) = package_obj["name"].as_str() {
+            // iOS projesi için beklenebilecek klasör adını oluşturun.
+            let ios_project_name = format!("{}.xcodeproj", project_name);
+            let ios_project_path = Path::new("ios").join(ios_project_name);
 
-        if ios_project_path.exists() {
-            return Ok(ios_project_path);
+            if ios_project_path.exists() {
+                return Ok(ios_project_path);
+            }
         }
     }
 
@@ -178,3 +184,24 @@ fn find_ios_project_path() -> Result<std::path::PathBuf, Box<dyn std::error::Err
     Err("iOS project not found")?
 }
 
+
+fn find_android_project_path() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
+    // Proje adını package.json dosyasından alın.
+    let package_path = Path::new("package.json");
+    if package_path.exists() {
+        let package_obj: serde_json::Value = serde_json::from_str(&fs::read_to_string(package_path)?)?;
+
+        if let Some(project_name) = package_obj["name"].as_str() {
+            // Android projesi için beklenebilecek klasör adını oluşturun.
+            let android_project_name = format!("{}_android", project_name);
+            let android_project_path = Path::new("android").join(android_project_name);
+
+            if android_project_path.exists() {
+                return Ok(android_project_path);
+            }
+        }
+    }
+
+    // Eğer proje adı bulunamazsa veya Android projesi yoksa hata döndürün.
+    Err("Android project not found".into())
+}

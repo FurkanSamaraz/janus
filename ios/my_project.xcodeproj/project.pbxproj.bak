@@ -1,0 +1,127 @@
+// Örnek project.pbxproj Dosyası
+
+// Başlık ve proje türü
+attributes = {
+    LastUpgradeCheck = 1220;
+    TargetAttributes = {
+        5E9927D91D60549A00A6DA44 = {
+            CreatedOnToolsVersion = 6.1.1;
+        };
+    };
+};
+
+objects = {
+    // Proje kimliği
+    5E9927D91D60549A00A6DA44 = {
+        isa = PBXProject;
+        buildConfigurationList = 5E9927DC1D60549A00A6DA44;
+        compatibilityVersion = "Xcode 12.0";
+        developmentRegion = en;
+        hasScannedForEncodings = 0;
+        knownRegions = (en);
+        mainGroup = 5E9927D71D60549A00A6DA44;
+        productRefGroup = 5E9927E41D60549A00A6DA44;
+        projectDirPath = "";
+        projectRoot = "";
+        targets = (5E9927E01D60549A00A6DA44);
+    };
+
+    // Ana grup
+    5E9927D71D60549A00A6DA44 = {
+        isa = PBXGroup;
+        children = (
+            5E9927E21D60549A00A6DA44,
+            5E9927E91D60549A00A6DA44,
+        );
+        sourceTree = "<group>";
+    };
+
+    // Kaynak dosyaları grubu
+    5E9927E21D60549A00A6DA44 = {
+        isa = PBXGroup;
+        children = (
+            5E9927E71D60549A00A6DA44,
+        );
+        name = Resources;
+        sourceTree = "<group>";
+    };
+
+    // Ana ekran dosyası
+    5E9927E71D60549A00A6DA44 = {
+        isa = PBXFileReference;
+        lastKnownFileType = file.storyboard;
+        name = "Main.storyboard";
+        path = Base.lproj/Main.storyboard;
+        sourceTree = "<group>";
+    };
+
+    // Build ayarları
+    5E9927DC1D60549A00A6DA44 = {
+        isa = XCConfigurationList;
+        buildConfigurations = (
+            5E9927DE1D60549A00A6DA44,
+        );
+        defaultConfigurationIsVisible = 0;
+        defaultConfigurationName = Debug;
+    };
+
+    // Debug için build ayarları
+    5E9927DE1D60549A00A6DA44 = {
+        isa = XCBuildConfiguration;
+        buildSettings = {
+            PRODUCT_BUNDLE_IDENTIFIER = com.example.myproject;
+            PRODUCT_NAME = "$(TARGET_NAME)";
+        };
+        name = Debug;
+    };
+
+    // Hedef
+    5E9927E01D60549A00A6DA44 = {
+        isa = PBXNativeTarget;
+        buildConfigurationList = 5E9927E11D60549A00A6DA44;
+        buildPhases = (
+            5E9927E61D60549A00A6DA44,
+        );
+        buildRules = ();
+        dependencies = ();
+        name = MyProject;
+        productName = MyProject;
+        productReference = 5E9927E31D60549A00A6DA44;
+        productType = "com.apple.product-type.application";
+    };
+
+    // Ürün dosyası referansı
+    5E9927E31D60549A00A6DA44 = {
+        isa = PBXFileReference;
+        explicitFileType = wrapper.application;
+        includeInIndex = 0;
+        path = MyProject.app;
+        sourceTree = BUILT_PRODUCTS_DIR;
+    };
+
+    // Build aşamaları
+    5E9927E61D60549A00A6DA44 = {
+        isa = PBXSourcesBuildPhase;
+        buildActionMask = 2147483647;
+        files = (
+            5E9927E51D60549A00A6DA44,
+        );
+        runOnlyForDeploymentPostprocessing = 0;
+    };
+
+    // Kaynak dosya referansı
+    5E9927E51D60549A00A6DA44 = {
+        isa = PBXBuildFile;
+        fileRef = 5E9927E71D60549A00A6DA44;
+    };
+
+    // Derleme ayarları
+    5E9927E11D60549A00A6DA44 = {
+        isa = XCConfigurationList;
+        buildConfigurations = (
+            5E9927E21D60549A00A6DA44,
+        );
+        defaultConfigurationIsVisible = 0;
+        defaultConfigurationName = Debug;
+    };
+};
