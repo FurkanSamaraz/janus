@@ -12,7 +12,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?;
     let regex_ios_version = Regex::new(r#"MARKETING_VERSION\s+=\s+[\d.]+;"#)?;
     let regex_android_version_code = Regex::new(r#"versionCode\s+\d+"#)?;
-    let regex_android_version_name = Regex::new(r#"versionName\s+"#)?;
+    let regex_android_version_name = Regex::new(r#"versionName\s+"[\d.]+""#)?;
+    
 
     let mut version = Version {
         major: 1,
