@@ -43,18 +43,19 @@ pub fn apply_android(
     let android_project_path = find_android_project_path()?;
 
     // Android projesinin build.gradle dosyasının yolunu belirleyin.
-    let build_gradle_path = android_project_path.join("build.gradle");
+    let build_gradle_path = android_project_path.join("app/build.gradle");
 
     if build_gradle_path.exists() {
         println!("Reading Android build.gradle");
         let mut build_gradle_text = fs::read_to_string(&build_gradle_path)?;
 
-        // versionCode ve versionName değerlerini günceller.
+        // versionCode değerini günceller.
         build_gradle_text =
             regex_android_version_code
                 .replace_all(&build_gradle_text, format!("versionCode {}", version.build).as_str())
                 .to_string();
 
+        // versionName değerini sadece yeni sürümle günceller.
         build_gradle_text =
             regex_android_version_name
                 .replace_all(&build_gradle_text, format!("versionName \"{}\"", version_str).as_str())
@@ -66,7 +67,6 @@ pub fn apply_android(
 
     Ok(())
 }
-
 // Bu fonksiyon iOS projenizi günceller.
 pub fn apply_ios(
     version: &Version,
