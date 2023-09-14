@@ -9,10 +9,10 @@ use std::fs;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 
-    let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?;
-    let regex_ios_version = Regex::new(r#"MARKETING_VERSION\s+=\s+[\d.]+;"#)?;
-    let regex_android_version_code = Regex::new(r#"versionCode\s+\d+"#)?;
-    let regex_android_version_name = Regex::new(r#"versionName\s+"[\d.]+""#)?;
+    let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?; //* IOS MATCH */
+    let regex_ios_version = Regex::new(r#"MARKETING_VERSION\s+=\s+[\d.]+;"#)?; //* IOS MATCH */
+    let regex_android_version_code = Regex::new(r#"versionCode\s+\d+"#)?;  //* ANDROID MATCH */
+    let regex_android_version_name = Regex::new(r#"versionName\s+"[\d.]+""#)?; //* ANDROID MATCH */
     
 
     let mut version = Version {
