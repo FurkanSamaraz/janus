@@ -42,6 +42,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(Arg::with_name("version").required(true).index(1))
                 .arg(Arg::with_name("last-version").required(true).index(2)),
         )
+        .subcommand(
+            SubCommand::with_name("bcrypt")
+                .about("Encrypt a value using bcrypt")
+                .arg(Arg::with_name("value").required(true).index(1))
+                .arg(Arg::with_name("rounds").short("r").takes_value(true).help("Specify rounds")),
+        )
+        .subcommand(
+            SubCommand::with_name("base64")
+                .about("Base64 encoding")
+                .arg(Arg::with_name("value").required(true).index(1))
+                .arg(Arg::with_name("file").short("f").takes_value(true).help("Base64 encode a file's contents")),
+        )
+        .subcommand(
+            SubCommand::with_name("urid")
+                .about("Maple URID operations")
+                .subcommand(SubCommand::with_name("generate").about("Generate a new URID"))
+                .subcommand(
+                    SubCommand::with_name("convert")
+                        .about("Convert a URID back into a SQL UUID")
+                        .arg(Arg::with_name("urid").required(true).index(1)),
+                ),
+        )
         .get_matches();
 
     let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?;
@@ -109,6 +131,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("apply-commit", Some(args)) => {
             let version_str = args.value_of("version").unwrap();
             apply::apply_commit(version_str, &last_version)?;
+        }
+        ("bcrypt", Some(args)) => {
+            let value = args.value_of("value").unwrap();
+            let rounds = args.value_of("rounds").map(|r| r.parse::<u32>().unwrap());
+            apply::bcrypt(value, rounds)?;
+        }
+        ("base64", Some(args)) => {
+            let value = args.value_of("value").unwrap();
+            let file = args.value_of("file");
+            apply::base64_encode(value, file)?;
+        }
+        ("urid", Some(subcommand)) => match subcommand.subcommand() {
+            ("generate", _) => {
+                apply::urid_generate()?;
+            }
+            ("convert", Some(args)) => {
+                let urid = args.value_of("urid").unwrap();
+                apply::urid_convert(urid)?;
+            }
+            _ => {
+                // Geçersiz urid altkomut kullanımını ele alın
+                println!("{}", matches.usage());
+            }
         }
         _ => {}
     }

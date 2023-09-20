@@ -4,6 +4,12 @@ use regex::Regex;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::error::Error;
+use bcrypt::{hash, DEFAULT_COST};
+use std::fs::File;
+use std::io::Read;
+use base64::encode;
+use uuid::Uuid;
 
 pub struct Version {
     pub major: u32,
@@ -197,5 +203,53 @@ pub fn version_patch() -> Result<(), Box<dyn std::error::Error>> {
     // Örnek olarak, bir versiyon dosyasını güncelleyebilirsiniz.
     
     println!("Versiyon yükseltildi.");
+    Ok(())
+}
+
+
+
+pub fn bcrypt(value: &str, rounds: Option<u32>) -> Result<(), Box<dyn Error>> {
+    let cost = rounds.unwrap_or(DEFAULT_COST);
+    
+    match hash(value, cost) {
+        Ok(hash) => {
+            println!("Encrypted value: {}", hash);
+        }
+        Err(err) => {
+            eprintln!("Error encrypting value: {}", err);
+        }
+    }
+    
+    Ok(())
+}
+
+
+pub fn base64_encode(value: &str, file: Option<&str>) -> Result<(), Box<dyn Error>> {
+    if let Some(file_path) = file {
+        println!("Base64 encoding file: '{}'", file_path);
+        let mut file = File::open(file_path)?;
+        let mut contents = Vec::new();
+        file.read_to_end(&mut contents)?;
+        let encoded = encode(&contents);
+        println!("{}", encoded);
+    } else {
+        println!("Base64 encoding: '{}'", value);
+        let encoded = encode(value);
+        println!("{}", encoded);
+    }
+    Ok(())
+}
+
+pub fn urid_generate() -> Result<(), Box<dyn Error>> {
+    println!("Generating a new Maple URID compatible with the Core system");
+    let id = Uuid::new_v4();
+    println!("Generated URID: {}", id);
+    Ok(())
+}
+
+pub fn urid_convert(urid: &str) -> Result<(), Box<dyn Error>> {
+    println!("Converting URID '{}' back into a SQL UUID", urid);
+    let id = Uuid::parse_str(urid)?;
+    println!("Converted UUID: {}", id);
     Ok(())
 }
