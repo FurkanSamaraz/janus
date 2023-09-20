@@ -1,0 +1,1 @@
+/Users/furkan/Desktop/RustProjects/janus/rust_verison_control/janus/target/debug/janus: /Users/furkan/Desktop/RustProjects/janus/rust_verison_control/janus/src/apply.rs /Users/furkan/Desktop/RustProjects/janus/rust_verison_control/janus/src/main.rs

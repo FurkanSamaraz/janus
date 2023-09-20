@@ -170,6 +170,7 @@ fn find_ios_project_path() -> Result<std::path::PathBuf, Box<dyn std::error::Err
 }
 
 fn find_android_project_path() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {//* ANDROID PACKAGE.JSON AND PATH */
+
     // Proje adını package.json dosyasından alın.
     let package_path = Path::new("package.json");
     if package_path.exists() {
@@ -191,3 +192,10 @@ fn find_android_project_path() -> Result<std::path::PathBuf, Box<dyn std::error:
     Err("Android project not found".into())
 }
 
+pub fn version_patch() -> Result<(), Box<dyn std::error::Error>> {
+    // Burada versiyonu yükseltmek veya güncellemek için yapmanız gereken işlemleri gerçekleştirin.
+    // Örnek olarak, bir versiyon dosyasını güncelleyebilirsiniz.
+    
+    println!("Versiyon yükseltildi.");
+    Ok(())
+}

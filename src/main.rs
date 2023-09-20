@@ -2,18 +2,52 @@
 
 mod apply;
 use apply::Version;
+use clap::{App, Arg, SubCommand};
 use regex::Regex;
-use std::env;
 use std::fs;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = env::args().collect();
+    let matches = App::new("janus")
+        .version("1.0")
+        .author("Your Name")
+        .about("A utility for managing project versions")
+        .subcommand(
+            SubCommand::with_name("version")
+                .about("Display the Janus version and patch level"),
+        )
+        .subcommand(
+            SubCommand::with_name("apply-package")
+                .about("Apply version to package.json")
+                .arg(Arg::with_name("version").required(true).index(1)),
+        )
+        .subcommand(
+            SubCommand::with_name("apply-android")
+                .about("Apply version to Android project")
+                .arg(Arg::with_name("version").required(true).index(1)),
+        )
+        .subcommand(
+            SubCommand::with_name("apply-ios")
+                .about("Apply version to iOS project")
+                .arg(Arg::with_name("version").required(true).index(1)),
+        )
+        .subcommand(
+            SubCommand::with_name("apply-new-version")
+                .about("Apply new version to .version file")
+                .arg(Arg::with_name("path").required(true).index(1))
+                .arg(Arg::with_name("version").required(true).index(2)),
+        )
+        .subcommand(
+            SubCommand::with_name("apply-commit")
+                .about("Apply a new commit")
+                .arg(Arg::with_name("version").required(true).index(1))
+                .arg(Arg::with_name("last-version").required(true).index(2)),
+        )
+        .get_matches();
 
-    let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?; //* IOS MATCH */
-    let regex_ios_version = Regex::new(r#"MARKETING_VERSION\s+=\s+[\d.]+;"#)?; //* IOS MATCH */
-    let regex_android_version_code = Regex::new(r#"versionCode\s+\d+"#)?;  //* ANDROID MATCH */
-    let regex_android_version_name = Regex::new(r#"versionName\s+"[\d.]+""#)?; //* ANDROID MATCH */
-    
+    let regex_ios_build = Regex::new(r#"CURRENT_PROJECT_VERSION\s+=\s+\d+;"#)?;
+    let regex_ios_version = Regex::new(r#"MARKETING_VERSION\s+=\s+[\d.]+;"#)?;
+    let regex_android_version_code = Regex::new(r#"versionCode\s+\d+"#)?;
+    let regex_android_version_name = Regex::new(r#"versionName\s+"[\d.]+"#)?;
 
     let mut version = Version {
         major: 1,
@@ -22,7 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         build: 0,
     };
 
-    let mut is_new_version = false;
+    let mut _is_new_version = false;
 
     if let Ok(version_text) = fs::read_to_string(".version") {
         let lines: Vec<&str> = version_text.lines().collect();
@@ -43,7 +77,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     } else {
-        // .version dosyası bulunamazsa varsayılan değerler kullanılır.
         println!(".version file not found. Using default version values.");
     }
 
@@ -52,48 +85,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         version.major, version.minor, version.patch, version.build
     );
 
-    if args.len() > 1 {
-        match args[1].as_str() {
-            "apply" => println!("Not patching any version, just applying current one"),
-            "patch" => {
-                version.patch += 1;
-                version.build += 1;
-                is_new_version = true;
-                println!("Patching version up to {}", version.patch);
-            }
-            "minor" => {
-                version.minor += 1;
-                version.patch = 0;
-                version.build += 1;
-                is_new_version = true;
-                println!("Minor version up to {}", version.minor);
-            }
-            "major" => {
-                version.major += 1;
-                version.minor = 0;
-                version.patch = 0;
-                version.build += 1;
-                is_new_version = true;
-                println!("Major version up to {}", version.major);
-            }
-            _ => eprintln!("Invalid argument \"{}\"", args[1]),
+    match matches.subcommand() {
+        ("version", _) => {
+            apply::version_patch()?;
         }
-    } else {
-        println!("Not patching anything, just applying the current version set");
+        ("apply-package", Some(args)) => {
+            let version_str = args.value_of("version").unwrap();
+            apply::apply_package(version_str)?;
+        }
+        ("apply-android", Some(args)) => {
+            let version_str = args.value_of("version").unwrap();
+            apply::apply_android(&version, version_str, &regex_android_version_code, &regex_android_version_name)?;
+        }
+        ("apply-ios", Some(args)) => {
+            let version_str = args.value_of("version").unwrap();
+            apply::apply_ios(&version, version_str, &regex_ios_build, &regex_ios_version)?;
+        }
+        ("apply-new-version", Some(args)) => {
+            let path = args.value_of("path").unwrap();
+            let _version_str = args.value_of("version").unwrap();
+            apply::apply_new_version(path, &version)?;
+        }
+        ("apply-commit", Some(args)) => {
+            let version_str = args.value_of("version").unwrap();
+            apply::apply_commit(version_str, &last_version)?;
+        }
+        _ => {}
     }
 
-    let version_str = format!("{}.{}.{}", version.major, version.minor, version.patch);
-    println!("New version is {} Build {}", version_str, version.build);
-
-    apply::apply_package(&version_str)?;
-    apply::apply_ios(&version, &version_str, &regex_ios_build, &regex_ios_version)?;
-    apply::apply_android(&version, &version_str, &regex_android_version_code, &regex_android_version_name)?;
-    apply::apply_new_version(".version", &version)?;
-
-    if is_new_version {
-        apply::apply_commit(&version_str, &last_version)?;
-    }
-
-    println!("Successful!");
+    println!("{}", matches.usage());
     Ok(())
 }
