@@ -1,6 +1,9 @@
 // src/main.rs
-
 mod apply;
+mod base64;
+mod bcrypt;
+mod git_utils;
+mod urid;
 use apply::Version;
 use clap::{App, Arg, SubCommand};
 use regex::Regex;
@@ -12,8 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .author("Your Name")
         .about("A utility for managing project versions")
         .subcommand(
-            SubCommand::with_name("version")
-                .about("Display the Janus version and patch level"),
+            SubCommand::with_name("version").about("Display the Janus version and patch level"),
         )
         .subcommand(
             SubCommand::with_name("apply-package")
@@ -46,13 +48,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             SubCommand::with_name("bcrypt")
                 .about("Encrypt a value using bcrypt")
                 .arg(Arg::with_name("value").required(true).index(1))
-                .arg(Arg::with_name("rounds").short("r").takes_value(true).help("Specify rounds")),
+                .arg(
+                    Arg::with_name("rounds")
+                        .short("r")
+                        .takes_value(true)
+                        .help("Specify rounds"),
+                ),
         )
         .subcommand(
             SubCommand::with_name("base64")
                 .about("Base64 encoding")
                 .arg(Arg::with_name("value").required(true).index(1))
-                .arg(Arg::with_name("file").short("f").takes_value(true).help("Base64 encode a file's contents")),
+                .arg(
+                    Arg::with_name("file")
+                        .short("f")
+                        .takes_value(true)
+                        .help("Base64 encode a file's contents"),
+                ),
         )
         .subcommand(
             SubCommand::with_name("urid")
@@ -62,6 +74,63 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     SubCommand::with_name("convert")
                         .about("Convert a URID back into a SQL UUID")
                         .arg(Arg::with_name("urid").required(true).index(1)),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("git")
+                .about("Git utility operations")
+                .subcommand(
+                    SubCommand::with_name("log")
+                        .about("Retrieve information about the last commit"),
+                )
+                .subcommand(SubCommand::with_name("commit").about("Commit changes"))
+                .subcommand(
+                    SubCommand::with_name("commit-message")
+                        .about("Retrieve the commit message of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-date")
+                        .about("Retrieve the commit date of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-author")
+                        .about("Retrieve the author of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-email")
+                        .about("Retrieve the email of the last commit author"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-hash")
+                        .about("Retrieve the hash of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-short-hash")
+                        .about("Retrieve the short hash of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-tree-hash")
+                        .about("Retrieve the tree hash of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-tree-short-hash")
+                        .about("Retrieve the short tree hash of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-parent-hashes")
+                        .about("Retrieve the parent hashes of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-parent-short-hash")
+                        .about("Retrieve the short parent hash of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-ref-names")
+                        .about("Retrieve reference names of the last commit"),
+                )
+                .subcommand(
+                    SubCommand::with_name("commit-encoding")
+                        .about("Retrieve the encoding of the last commit"),
                 ),
         )
         .get_matches();
@@ -117,7 +186,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         ("apply-android", Some(args)) => {
             let version_str = args.value_of("version").unwrap();
-            apply::apply_android(&version, version_str, &regex_android_version_code, &regex_android_version_name)?;
+            apply::apply_android(
+                &version,
+                version_str,
+                &regex_android_version_code,
+                &regex_android_version_name,
+            )?;
         }
         ("apply-ios", Some(args)) => {
             let version_str = args.value_of("version").unwrap();
@@ -135,26 +209,71 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("bcrypt", Some(args)) => {
             let value = args.value_of("value").unwrap();
             let rounds = args.value_of("rounds").map(|r| r.parse::<u32>().unwrap());
-            apply::bcrypt(value, rounds)?;
+            bcrypt::bcrypt(value, rounds)?;
         }
         ("base64", Some(args)) => {
             let value = args.value_of("value").unwrap();
             let file = args.value_of("file");
-            apply::base64_encode(value, file)?;
+            base64::base64_encode(value, file)?;
         }
         ("urid", Some(subcommand)) => match subcommand.subcommand() {
             ("generate", _) => {
-                apply::urid_generate()?;
+                urid::urid_generate()?;
             }
             ("convert", Some(args)) => {
                 let urid = args.value_of("urid").unwrap();
-                apply::urid_convert(urid)?;
+                urid::urid_convert(urid)?;
             }
             _ => {
                 // Geçersiz urid altkomut kullanımını ele alın
                 println!("{}", matches.usage());
             }
-        }
+        },
+        ("git", Some(subcommand)) => match subcommand.subcommand() {
+            ("commit", _) => {
+                git_utils::find_last_commit()?;
+            }
+            ("commit_message", _) => {
+                git_utils::find_last_commit_message()?;
+            }
+            ("commit_date", _) => {
+                git_utils::find_last_commit_date()?;
+            }
+            ("commit_author", _) => {
+                git_utils::find_last_commit_author()?;
+            }
+            ("commit_email", _) => {
+                git_utils::find_last_commit_email()?;
+            }
+            ("commit_hash", _) => {
+                git_utils::find_last_commit_hash()?;
+            }
+            ("commit_short_hash", _) => {
+                git_utils::find_last_commit_short_hash()?;
+            }
+            ("commit_tree_hash", _) => {
+                git_utils::find_last_commit_tree_hash()?;
+            }
+            ("commit_tree_short_hash", _) => {
+                git_utils::find_last_commit_tree_short_hash()?;
+            }
+            ("commit_parent_hash", _) => {
+                git_utils::find_last_commit_parent_hash()?;
+            }
+            ("commit_parent_short_hash", _) => {
+                git_utils::find_last_commit_parent_short_hash()?;
+            }
+            ("commit_ref_names", _) => {
+                git_utils::find_last_commit_ref_names()?;
+            }
+            ("commit_encoding", _) => {
+                git_utils::find_last_commit_encoding()?;
+            }
+            _ => {
+                // Geçersiz urid altkomut kullanımını ele alın
+                println!("{}", matches.usage());
+            }
+        },
         _ => {}
     }
 
